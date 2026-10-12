@@ -68,6 +68,25 @@ A comprehensive Neovim plugin that provides quality-of-life functionality for Go
 }
 ```
 
+### Using native `vim.pack` (Neovim ≥ 0.12)
+
+`vim.pack.add` does not run `setup()` for you — the follow-up call is explicit.
+Dependencies also need to be added separately.
+
+```lua
+vim.pack.add({
+  { src = "https://github.com/nvim-lua/plenary.nvim" },
+  { src = "https://github.com/folke/snacks.nvim" }, -- optional but recommended
+  { src = "https://github.com/jedi-knights/go.nvim" },
+})
+
+require("go").setup()
+```
+
+Pin to a specific tag or branch with `version = "..."`. `vim.pack.add` is
+idempotent — it clones on first run and does nothing on subsequent runs. Use
+`:lua vim.pack.update()` to pull new commits.
+
 ### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
