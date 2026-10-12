@@ -1,6 +1,12 @@
 # go.nvim
 
-A comprehensive Neovim plugin that provides quality-of-life functionality for Go development. Designed to work seamlessly with any Neovim distribution while providing powerful Go-specific features.
+A Neovim plugin that wraps the Go CLI tooling you already use (`go test`, `go install`, `goimports`, `golint`/`staticcheck`, `delve`, `go-task`) behind a consistent set of commands and pickers.
+
+## Overview
+
+`gopls` already covers in-buffer code intelligence — completion, go-to-definition, diagnostics. What it doesn't cover is the rest of the Go workflow: dropping to a terminal to run `go test ./...`, remembering the `goimports -w` incantation, re-running the last `go-task` target, or picking a module to switch to in a multi-module repo.
+
+`go.nvim` closes that gap. It exposes those CLI tools as `:Go*` commands, surfaces modules, packages, imports, and tasks through interactive pickers, and keeps the task-runner history so you can re-run the last target without leaving the editor.
 
 ## ✨ Features
 
@@ -45,7 +51,7 @@ A comprehensive Neovim plugin that provides quality-of-life functionality for Go
 
 ## 📦 Requirements
 
-- **Neovim >= 0.8**
+- **Neovim >= 0.8** (plugin runtime); **>= 0.12** required only if installing via `vim.pack`
 - **Go 1.16+**
 - **[plenary.nvim](https://github.com/nvim-lua/plenary.nvim)** - Required for async operations
 - **[snacks.nvim](https://github.com/folke/snacks.nvim)** - For interactive pickers (optional but recommended)
@@ -213,19 +219,25 @@ require("go").setup({
 | Keymap | Description |
 |--------|-------------|
 | `<leader>gm` | Open module picker |
-| `<leader>gi` | Install package |
-| `<leader>gu` | Update package |
+| `<leader>gi` | Organize imports |
+| `<leader>gip` | Open import picker |
 | `<leader>gf` | Format buffer |
 | `<leader>gl` | Lint buffer |
 | `<leader>gt` | Run tests |
+| `<leader>gka` | Open task picker |
+| `<leader>gkr` | Re-run last task |
+| `<leader>gh` | Show task history |
 | `<leader>gd` | Start debugging |
+| `<leader>gdt` | Toggle debug mode |
 | `<leader>gr` | Open REPL |
+| `<leader>gp` | Open package picker |
+| `<leader>gc` | Run test coverage |
+| `<leader>gcr` | Show coverage report |
 
 ### Interactive Pickers
 
-- **Module Picker**: `:GoModulePicker` - Switch between Go modules
-- **Package Picker**: `:GoPackagePicker` - Browse and manage packages
-- **Test Picker**: `:GoTestPicker` - Discover and run tests
+- **Module Picker**: `:GoModule` - Switch between Go modules
+- **Package Picker**: `:GoPackage` - Browse and manage packages
 - **Import Picker**: `:GoImportPicker` - Organize imports
 - **Task Picker**: `:GoTask` - Discover and run tasks (go-task, make, scripts)
 
@@ -234,25 +246,12 @@ require("go").setup({
 ```
 go.nvim/
 ├── lua/go/
-│   ├── init.lua              # Main plugin entry point
+│   ├── init.lua              # Main plugin entry point and public API
 │   ├── config.lua            # Configuration management
-│   ├── types.lua             # Type definitions
-│   ├── detector.lua          # Project and environment detection
-│   ├── commands.lua          # User commands
-│   ├── ui.lua               # UI components and pickers
-│   ├── runner.lua           # Code execution and testing
-│   ├── formatter.lua        # Code formatting
-│   ├── linter.lua           # Code linting
-│   ├── debugger.lua         # Debugging integration
-│   ├── repl.lua             # REPL management
-│   ├── package.lua          # Package management
-│   ├── module.lua           # Module management
-│   ├── imports.lua          # Import management
-│   ├── coverage.lua         # Test coverage
-│   ├── tasks.lua            # Task runner (go-task, make, scripts)
-│   └── utils.lua            # Utility functions
-├── plugin/go.lua            # Plugin bootstrap
-└── README.md               # This file
+│   ├── tasks.lua             # Task runner (go-task, make, scripts)
+│   └── types.lua             # Type definitions
+├── plugin/go.lua             # Plugin bootstrap (commands + keymaps)
+└── README.md                 # This file
 ```
 
 ## 🔧 Development
@@ -264,13 +263,6 @@ go.nvim/
 3. **Implement proper error handling**: Use `pcall` and provide helpful error messages
 4. **Add comprehensive documentation**: Document all public APIs
 5. **Write tests**: Include unit tests for new functionality
-
-### Testing
-
-```bash
-# Run tests
-nvim --headless -c "lua require('plenary.test_harness').test_directory('tests', { minimal_init = 'tests/minimal_init.lua' })"
-```
 
 ### Contributing
 
